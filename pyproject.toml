@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatbot_lib"
+version = "0.0.1"
+authors = [
+  { name="Gabriel Pinto Sasaki", email="gabrielpintosasaki@outlook.com" },
+]
+description = "A simple package for create chatbots using LangChain"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/Gabriel-Sasaki/chatbot-lib"
+Issues = "https://github.com/Gabriel-Sasaki/chatbot-lib/issues"
