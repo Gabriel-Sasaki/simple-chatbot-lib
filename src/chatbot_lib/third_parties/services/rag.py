@@ -6,7 +6,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 
 # Chatbot lib
-from services.models import RAGContextService
+from chatbot_lib.services.models import RAGContextService
 
 class AzureRAGContextService(RAGContextService):
     def __init__(self, credentials: Any) -> None:
