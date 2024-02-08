@@ -16,6 +16,11 @@ class ContextService(metaclass=abc.ABCMeta):
     """
     def __init__(self,
                  credentials: Any) -> None:
+        """Initializes a new instance of the ContextService class.
+
+        Args:
+            credentials (Any): The credentials used by the context service.
+        """
         self._credentials = credentials
 
     @abc.abstractmethod
@@ -52,6 +57,15 @@ class APIContextService(ContextService):
                  credentials: dict[str, Any],
                  headers: list[dict[str, Any]],
                  domains: list[str]) -> None:
+        """Initializes a new instance of the APIContextService class.
+
+        Args:
+            llm (BaseChatModel): The language learning model of the context service.
+            documentation (str): The API documentation.
+            credentials (dict[str, Any]): The API credentials.
+            headers (list[dict[str, Any]]): The API headers.
+            domains (list[str]): The API domains.
+        """
         super().__init__(credentials)
         self._llm = llm
         self._documentation = documentation

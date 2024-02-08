@@ -49,6 +49,20 @@ class Chatbot:
                  language: str,
                  base_messages: Optional[list[BaseMessage]],
                  message_mapper: MessageMapper) -> None:
+        """Initializes a new instance of the Chatbot class.
+
+        Args:
+            llm (BaseChatModel): The language learning model of the chatbot.
+            context_services (list[ContextService]): The context services used by the chatbot.
+            restrictions (list[str]): The restrictions applied to the chatbot.
+            personality (str): The personality of the chatbot.
+            language (str): The language used by the chatbot.
+            base_messages (Optional[list[BaseMessage]]): The base messages used by the chatbot.
+            message_mapper (MessageMapper): The message mapper used by the chatbot.
+
+        Raises:
+            ValueError: If context_services or restrictions is an empty list.
+        """
         if len(context_services) == 0:
             raise ValueError('The context_services argument must to have one or more values')
         if len(restrictions) == 0:

@@ -21,6 +21,14 @@ class AzureRAGContextService(RAGContextService):
         retrieve_context(question: str, **kwargs) -> str: Retrieves context from Azure.
     """
     def __init__(self, credentials: Any) -> None:
+        """Initializes a new instance of the AzureRAGContextService class.
+
+        Args:
+            credentials (Any): The Azure credentials.
+
+        Raises:
+            ValueError: If credentials does not contain 'endpoint', 'azure_key', or 'index_name'.
+        """
         if credentials.get('endpoint') is None:
             raise ValueError('For AzureRAGContextService, the credentials must '\
                 'to have the endpoint attribute')
