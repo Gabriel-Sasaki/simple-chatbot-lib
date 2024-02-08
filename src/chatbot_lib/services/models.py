@@ -4,15 +4,48 @@ from langchain_core.language_models import BaseChatModel
 from langchain.chains import APIChain
 
 class ContextService(metaclass=abc.ABCMeta):
+    """An abstract base class for context services.
+
+    This class provides a constructor and an abstract method for retrieving context.
+
+    Attributes:
+        credentials (Any): The credentials used by the context service.
+
+    Methods:
+        retrieve_context(question: str, **kwargs) -> str: An abstract method for retrieving context.
+    """
     def __init__(self,
                  credentials: Any) -> None:
         self._credentials = credentials
 
     @abc.abstractmethod
     def retrieve_context(self, question: str, **kwargs) -> str:
+        """An abstract method for retrieving context.
+
+        Args:
+            question (str): The question for which to retrieve the context.
+
+        Raises:
+            NotImplementedError: This method must be implemented by a subclass.
+        """
         raise NotImplementedError()
 
-class APIContextService(ContextService, metaclass=abc.ABCMeta):
+class APIContextService(ContextService):
+    """A class for API context services.
+
+    This class extends ContextService and provides a constructor and a method for retrieving 
+    context from an API.
+
+    Attributes:
+        llm (BaseChatModel): The language learning model of the context service.
+        documentation (str): The API documentation.
+        credentials (dict[str, Any]): The API credentials.
+        headers (list[dict[str, Any]]): The API headers.
+        domains (list[str]): The API domains.
+
+    Methods:
+        retrieve_context(question: str, **kwargs) -> str: Retrieves context from an API.
+    """
     def __init__(self,
                  llm: BaseChatModel,
                  documentation: str,
@@ -26,6 +59,17 @@ class APIContextService(ContextService, metaclass=abc.ABCMeta):
         self._domains = domains
 
     def retrieve_context(self, question: str, **kwargs) -> str:
+        """Retrieves context from an API.
+
+        This method creates an API chain from the language learning model and API documentation, 
+        and then invokes this chain with the given question.
+
+        Args:
+            question (str): The question for which to retrieve the context.
+
+        Returns:
+            str: The context retrieved from the API.
+        """
         chain = APIChain.from_llm_and_api_docs(
             llm=self._llm,
             api_docs=self._documentation,
@@ -38,4 +82,7 @@ class APIContextService(ContextService, metaclass=abc.ABCMeta):
         return chain.invoke(question)
 
 class RAGContextService(ContextService, metaclass=abc.ABCMeta):
-    pass
+    """An abstract base class for RAG context services.
+
+    This class extends ContextService but does not provide any additional methods or attributes.
+    """
