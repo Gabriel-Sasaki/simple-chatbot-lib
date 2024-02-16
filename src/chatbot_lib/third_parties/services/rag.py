@@ -51,12 +51,12 @@ class AzureRAGContextService(RAGContextService):
         """
         credential = AzureKeyCredential(self._azure_key)
         client = SearchClient(endpoint=self._endpoint,
-                            index_name=self._azure_key,
+                            index_name=self._index_name,
                             credential=credential)
         top = kwargs.get('top', 1)
         search_item_paged = client.search(search_text=question, top=top)
         results = ''
-        for item_paged in search_item_paged:
-            for key, value in item_paged.items():
-                results += f'{key}: {value}\n'
+        answers = search_item_paged.get_answers()
+        for key, answer in enumerate(answers):
+            results += f'{key+1}: {answer.text}\n'
         return results
