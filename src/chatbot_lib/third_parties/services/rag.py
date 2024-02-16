@@ -15,30 +15,26 @@ class AzureRAGContextService(RAGContextService):
     context from Azure.
 
     Attributes:
-        credentials (Any): The Azure credentials.
+        _endpoint (str): The Azure endpoint.
+        _azure_key (str): The Azure key.
+        _index_name (str): The Azure index name.
 
     Methods:
         retrieve_context(question: str, **kwargs) -> str: Retrieves context from Azure.
     """
-    def __init__(self, credentials: Any) -> None:
-        """Initializes a new instance of the AzureRAGContextService class.
+    def __init__(self, endpoint: str, azure_key: str, index_name: str) -> None:
+        """Initializes the AzureRAGContextService with the given endpoint, 
+        azure_key, and index_name.
 
         Args:
-            credentials (Any): The Azure credentials.
-
-        Raises:
-            ValueError: If credentials does not contain 'endpoint', 'azure_key', or 'index_name'.
+            endpoint (str): The Azure endpoint.
+            azure_key (str): The Azure key.
+            index_name (str): The Azure index name.
         """
-        if credentials.get('endpoint') is None:
-            raise ValueError('For AzureRAGContextService, the credentials must '\
-                'to have the endpoint attribute')
-        if credentials.get('azure_key') is None:
-            raise ValueError('For AzureRAGContextService, the credentials must '\
-                'to have the azure_key attribute')
-        if credentials.get('index_name') is None:
-            raise ValueError('For AzureRAGContextService, the credentials must '\
-                'to have the index_name attribute')
-        super().__init__(credentials)
+        super().__init__()
+        self._endpoint = endpoint
+        self._azure_key = azure_key
+        self._index_name = index_name
 
     def retrieve_context(self, question: str, **kwargs) -> str:
         """Retrieves context from Azure.
@@ -53,12 +49,9 @@ class AzureRAGContextService(RAGContextService):
         Returns:
             str: The context retrieved from Azure.
         """
-        endpoint = self._credentials.get('endpoint')
-        azure_key = self._credentials.get('azure_key')
-        index_name = self._credentials.get('index_name')
-        credential = AzureKeyCredential(azure_key)
-        client = SearchClient(endpoint=endpoint,
-                            index_name=index_name,
+        credential = AzureKeyCredential(self._azure_key)
+        client = SearchClient(endpoint=self._endpoint,
+                            index_name=self._azure_key,
                             credential=credential)
         top = kwargs.get('top', 1)
         search_item_paged = client.search(search_text=question, top=top)

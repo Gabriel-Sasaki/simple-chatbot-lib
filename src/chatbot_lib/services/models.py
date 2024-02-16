@@ -8,20 +8,11 @@ class ContextService(metaclass=abc.ABCMeta):
 
     This class provides a constructor and an abstract method for retrieving context.
 
-    Attributes:
-        credentials (Any): The credentials used by the context service.
-
     Methods:
         retrieve_context(question: str, **kwargs) -> str: An abstract method for retrieving context.
     """
-    def __init__(self,
-                 credentials: Any) -> None:
-        """Initializes a new instance of the ContextService class.
-
-        Args:
-            credentials (Any): The credentials used by the context service.
-        """
-        self._credentials = credentials
+    def __init__(self) -> None:
+        """Initializes a new instance of the ContextService class."""
 
     @abc.abstractmethod
     def retrieve_context(self, question: str, **kwargs) -> str:
@@ -66,9 +57,10 @@ class APIContextService(ContextService):
             headers (list[dict[str, Any]]): The API headers.
             domains (list[str]): The API domains.
         """
-        super().__init__(credentials)
+        super().__init__()
         self._llm = llm
         self._documentation = documentation
+        self._credentials = credentials
         self._headers = headers
         self._domains = domains
 
