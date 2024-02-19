@@ -32,11 +32,11 @@ from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(openai_api_key='...')
 
-azure_rag_context = AzureRAGContextService({
-    'azure_key': '...',
-    'endpoint': '...',
-    'index_name': '...'
-})
+azure_rag_context = AzureRAGContextService(
+    azure_key='...',
+    endpoint='...',
+    index_name='...'
+)
 
 message_mapper = MessageMapper()
 
@@ -44,6 +44,7 @@ chatbot = Chatbot(llm=llm,
                   context_services=[azure_rag_context],
                   restrictions=['Do not answer questions that deviate from the informed context'],
                   personality='Friendly, helpful, and respectful',
+                  language='English',
                   base_messages=None,
                   message_mapper=message_mapper)
 
