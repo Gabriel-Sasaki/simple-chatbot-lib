@@ -47,8 +47,9 @@ class Chatbot:
                  restrictions: list[str],
                  personality: str,
                  language: str,
-                 base_messages: Optional[list[BaseMessage]],
-                 message_mapper: MessageMapper) -> None:
+                 message_mapper: MessageMapper,
+                 keep_messages: bool = True,
+                 base_messages: Optional[list[BaseMessage]] = None) -> None:
         """Initializes a new instance of the Chatbot class.
 
         Args:
@@ -57,8 +58,9 @@ class Chatbot:
             restrictions (list[str]): The restrictions applied to the chatbot.
             personality (str): The personality of the chatbot.
             language (str): The language used by the chatbot.
-            base_messages (Optional[list[BaseMessage]]): The base messages used by the chatbot.
             message_mapper (MessageMapper): The message mapper used by the chatbot.
+            keep_messages (bool): Whether to automatically keep the conversation history or not.
+            base_messages (Optional[list[BaseMessage]]): The base messages used by the chatbot.
 
         Raises:
             ValueError: If context_services or restrictions is an empty list.
@@ -74,6 +76,7 @@ class Chatbot:
         self.__personality = personality
         self.__language = language
         self.__message_mapper = message_mapper
+        self.__keep_messages = keep_messages
 
         if base_messages is None:
             self.__base_messages = [self.__create_introduction()]
@@ -128,7 +131,10 @@ class Chatbot:
         self.__base_messages.append(system_message)
         self.__base_messages.append(human_message)
         ai_message = self.__llm.invoke(input=self.__base_messages)
-        self.__base_messages.append(ai_message)
+        if self.__keep_messages:
+            self.__base_messages.append(ai_message)
+        else:
+            self.__base_messages.clear()
         return str(ai_message.content)
 
     def __create_system_prompt(self, contexts: list[str]) -> BaseMessage:
@@ -148,17 +154,20 @@ class Chatbot:
             BaseMessage: A system prompt message created from the given contexts and 
             the chatbot's language and restrictions.
         """
-        template = """Answer in {language} language the user's question
-        using the context between the tags <context></context> and obeying
-        the restrictions between the tags <restrictions></restrinctions>
+        template = """Use the information present in the text between 
+        the <context> tags to answer all questions. Obey the restrictions 
+        present in the text between the <restrictions> tags. Provide 
+        as much detail as possible.
         
         <context>
         {context}
-        </context>
+        <context>
         
         <restrictions>
         {restrictions}
-        </restrictions>
+        <restrictions>
+
+        Answer in {language}.
         """
         final_context = ''
         for index, context in enumerate(contexts):
@@ -214,7 +223,8 @@ class Chatbot:
             question (str): The question for which to retrieve the context.
 
         Returns:
-            list[str]: A list of contexts for the given question retrieved from all context services.
+            list[str]: A list of contexts for the given question retrieved from all 
+            context services.
 
         Raises:
             Can raises any Error's from the retrieve_context() method.
