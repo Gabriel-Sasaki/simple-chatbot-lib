@@ -61,15 +61,7 @@ class Chatbot:
             message_mapper (MessageMapper): The message mapper used by the chatbot.
             keep_messages (bool): Whether to automatically keep the conversation history or not.
             base_messages (Optional[list[BaseMessage]]): The base messages used by the chatbot.
-
-        Raises:
-            ValueError: If context_services or restrictions is an empty list.
         """
-        if len(context_services) == 0:
-            raise ValueError('The context_services argument must to have one or more values')
-        if len(restrictions) == 0:
-            raise ValueError('The restrictions argument must to have one or more values')
-
         self.__llm = llm
         self.__context_services = context_services
         self.__restrictions = restrictions
