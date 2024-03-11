@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "simple_chatbot_lib"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
   { name="Gabriel Pinto Sasaki", email="gabrielpintosasaki@outlook.com" },
 ]
@@ -18,17 +18,17 @@ classifiers = [
   "Operating System :: OS Independent",
 ]
 dependencies = [
-  "langchain==0.1.0"
+  "langchain=>0.1.0"
 ]
 
 [project.optional-dependencies]
 azure = [
-  "azure-search-documents==11.4.0",
-  "azure-common==1.1.28",
-  "azure-core==1.29.6"
+  "azure-search-documents=>11.4.0",
+  "azure-common=>1.1.28",
+  "azure-core=>1.29.6"
 ]
 openai = [
-  "langchain-openai==0.0.2.post1"
+  "langchain-openai=>0.0.2.post1"
 ]
 
 [project.urls]
