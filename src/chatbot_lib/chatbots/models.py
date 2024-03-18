@@ -70,7 +70,7 @@ class Chatbot:
         self.__message_mapper = message_mapper
         self.__keep_messages = keep_messages
 
-        if base_messages is None:
+        if base_messages is None or len(base_messages) < 1:
             self.__base_messages = [self.__create_introduction()]
         else:
             self.__base_messages = base_messages
