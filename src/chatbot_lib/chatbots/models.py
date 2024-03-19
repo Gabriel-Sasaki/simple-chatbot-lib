@@ -25,8 +25,9 @@ class Chatbot:
         restrictions (list[str]): The restrictions applied to the chatbot.
         personality (str): The personality of the chatbot.
         language (str): The language used by the chatbot.
-        base_messages (list[BaseMessage]): The base messages used by the chatbot.
         message_mapper (MessageMapper): The message mapper used by the chatbot.
+        keep_messages (bool): Whether to automatically keep the conversation history or not.
+        base_messages (list[BaseMessage]): The base messages used by the chatbot.
 
     Methods:
         chat(question: str) -> str: Initiates a chat with the AI by asking a question and 
@@ -118,60 +119,46 @@ class Chatbot:
             str: The content of the AI's response message.
         """
         contexts = self.__retrieve_context(question)
-        system_message = self.__create_system_prompt(contexts)
+        contexts_system_message = self.__create_contexts_message(contexts)
+        restrictions_system_message = self.__create_restrictions_message()
         human_message = self.__create_human_prompt(question)
-        self.__base_messages.append(system_message)
-        self.__base_messages.append(human_message)
         ai_message = self.__llm.invoke(input=self.__base_messages)
         if self.__keep_messages:
+            self.__base_messages.append(contexts_system_message)
+            self.__base_messages.append(restrictions_system_message)
+            self.__base_messages.append(human_message)
             self.__base_messages.append(ai_message)
         else:
             self.__base_messages.clear()
         return str(ai_message.content)
 
-    def __create_system_prompt(self, contexts: list[str]) -> BaseMessage:
-        """Creates a system prompt message from a given list of contexts.
+    def __create_contexts_message(self, contexts: list[str]) -> BaseMessage:
+        template = """se the information present in the text between
+        the <contexts> tags to answer all questions.
 
-        This method uses a template to create a system message prompt. 
-        The template includes placeholders for the language, context, and restrictions. 
-        It then formats this template with the chatbot's language, the given contexts, and the 
-        chatbot's restrictions to create a system prompt message. The system prompt message is 
-        then returned.
-
-        Args:
-            contexts (list[str]): The list of contexts to be used to create the 
-            system prompt message.
-
-        Returns:
-            BaseMessage: A system prompt message created from the given contexts and 
-            the chatbot's language and restrictions.
+        <contexts>
+        {contexts}
+        <contexts>
         """
-        template = """Use the information present in the text between 
-        the <context> tags to answer all questions. Obey the restrictions 
-        present in the text between the <restrictions> tags. Provide 
-        as much detail as possible.
-        
-        <context>
-        {context}
-        <context>
-        
+        contexts_str = ''
+        for index, context in enumerate(contexts):
+            contexts_str += f'{index+1} - {context}\n'
+        system_prompt_template = SystemMessagePromptTemplate.from_template(template)
+        return system_prompt_template.format(contexts=contexts_str)
+
+    def __create_restrictions_message(self) -> BaseMessage:
+        template = """Obey the restrictions present in the text
+        between the <restrictions> tags.
+
         <restrictions>
         {restrictions}
         <restrictions>
-
-        Answer in {language}.
         """
-        final_context = ''
-        for index, context in enumerate(contexts):
-            final_context += f'{index+1} - {context}\n'
-        final_restrictions = ''
+        restrictions_str = ''
         for index, restriction in enumerate(self.__restrictions):
-            final_restrictions += f'{index+1} - {restriction}\n'
+            restrictions_str += f'{index+1} - {restriction}\n'
         system_prompt_template = SystemMessagePromptTemplate.from_template(template)
-        message = system_prompt_template.format(language=self.__language,
-                                                context=final_context,
-                                                restrictions=final_restrictions)
-        return message
+        return system_prompt_template.format(restrictions=restrictions_str)
 
     def __create_human_prompt(self, question: str) -> BaseMessage:
         """Creates a human prompt message from a given question.
@@ -199,9 +186,12 @@ class Chatbot:
         Returns:
             BaseMessage: An introduction message personalized with the chatbot's personality.
         """
-        template = 'You are a chatbot with this personality: {personality}'
+        template = """You are a chatbot with this personality: {personality}.
+        Provide as much detail as possible. Answer in {language}.
+        """
         system_prompt_template = SystemMessagePromptTemplate.from_template(template)
-        message = system_prompt_template.format(personality=self.__personality)
+        message = system_prompt_template.format(personality=self.__personality,
+                                                language=self.__language)
         return message
 
     def __retrieve_context(self, question: str) -> list[str]:
