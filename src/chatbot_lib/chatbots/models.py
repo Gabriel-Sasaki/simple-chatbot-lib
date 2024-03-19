@@ -21,13 +21,13 @@ class Chatbot:
 
     Attributes:
         llm (BaseChatModel): The language learning model of the chatbot.
-        context_services (list[ContextService]): The context services used by the chatbot.
         restrictions (list[str]): The restrictions applied to the chatbot.
         personality (str): The personality of the chatbot.
         language (str): The language used by the chatbot.
         message_mapper (MessageMapper): The message mapper used by the chatbot.
         keep_messages (bool): Whether to automatically keep the conversation history or not.
-        base_messages (list[BaseMessage]): The base messages used by the chatbot.
+        context_services (Optional[list[ContextService]]): The context services used by the chatbot.
+        base_messages (Optional[list[BaseMessage]]): The base messages used by the chatbot.
 
     Methods:
         chat(question: str) -> str: Initiates a chat with the AI by asking a question and 
@@ -44,31 +44,32 @@ class Chatbot:
     """
     def __init__(self,
                  llm: BaseChatModel,
-                 context_services: list[ContextService],
                  restrictions: list[str],
                  personality: str,
                  language: str,
                  message_mapper: MessageMapper,
                  keep_messages: bool = True,
+                 context_services: Optional[list[ContextService]] = None,
                  base_messages: Optional[list[BaseMessage]] = None) -> None:
         """Initializes a new instance of the Chatbot class.
 
         Args:
             llm (BaseChatModel): The language learning model of the chatbot.
-            context_services (list[ContextService]): The context services used by the chatbot.
             restrictions (list[str]): The restrictions applied to the chatbot.
             personality (str): The personality of the chatbot.
             language (str): The language used by the chatbot.
             message_mapper (MessageMapper): The message mapper used by the chatbot.
             keep_messages (bool): Whether to automatically keep the conversation history or not.
+            context_services (Optional[list[ContextService]]): The context services used by the
+            chatbot.
             base_messages (Optional[list[BaseMessage]]): The base messages used by the chatbot.
         """
         self.__llm = llm
-        self.__context_services = context_services
         self.__restrictions = restrictions
         self.__personality = personality
         self.__language = language
         self.__message_mapper = message_mapper
+        self.__context_services = context_services
         self.__keep_messages = keep_messages
 
         if base_messages is None or len(base_messages) < 1:
@@ -119,12 +120,15 @@ class Chatbot:
             str: The content of the AI's response message.
         """
         contexts = self.__retrieve_context(question)
-        contexts_system_message = self.__create_contexts_message(contexts)
+        has_context = self.__context_services is not None and len(self.__context_services) > 0
+        if has_context:
+            contexts_system_message = self.__create_contexts_message(contexts)
         restrictions_system_message = self.__create_restrictions_message()
         human_message = self.__create_human_prompt(question)
         ai_message = self.__llm.invoke(input=self.__base_messages)
         if self.__keep_messages:
-            self.__base_messages.append(contexts_system_message)
+            if has_context:
+                self.__base_messages.append(contexts_system_message)
             self.__base_messages.append(restrictions_system_message)
             self.__base_messages.append(human_message)
             self.__base_messages.append(ai_message)
@@ -133,7 +137,7 @@ class Chatbot:
         return str(ai_message.content)
 
     def __create_contexts_message(self, contexts: list[str]) -> BaseMessage:
-        template = """se the information present in the text between
+        template = """Use the information present in the text between
         the <contexts> tags to answer all questions.
 
         <contexts>
