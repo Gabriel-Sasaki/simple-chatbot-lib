@@ -6,7 +6,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 
 # Chatbot lib
-from chatbot_lib.services.models import RAGContextService
+from simple_chatbot_lib.services.models import RAGContextService
 
 class AzureRAGContextService(RAGContextService):
     """A class for Azure RAG context services.

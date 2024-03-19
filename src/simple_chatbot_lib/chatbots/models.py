@@ -9,8 +9,8 @@ from langchain_core.language_models import BaseChatModel
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 # Chatbot Lib
-from chatbot_lib.services.models import ContextService
-from chatbot_lib.mappers.messages import MessageMapper
+from simple_chatbot_lib.services.models import ContextService
+from simple_chatbot_lib.mappers.messages import MessageMapper
 
 class Chatbot:
     """A class to represent a chatbot.
