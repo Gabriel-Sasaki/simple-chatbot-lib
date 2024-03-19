@@ -123,14 +123,13 @@ class Chatbot:
         if has_context:
             contexts = self.__retrieve_context(question)
             contexts_system_message = self.__create_contexts_message(contexts)
+            self.__base_messages.append(contexts_system_message)
         restrictions_system_message = self.__create_restrictions_message()
         human_message = self.__create_human_prompt(question)
+        self.__base_messages.append(restrictions_system_message)
+        self.__base_messages.append(human_message)
         ai_message = self.__llm.invoke(input=self.__base_messages)
         if self.__keep_messages:
-            if has_context:
-                self.__base_messages.append(contexts_system_message)
-            self.__base_messages.append(restrictions_system_message)
-            self.__base_messages.append(human_message)
             self.__base_messages.append(ai_message)
         else:
             self.__base_messages.clear()
