@@ -119,9 +119,9 @@ class Chatbot:
         Returns:
             str: The content of the AI's response message.
         """
-        contexts = self.__retrieve_context(question)
         has_context = self.__context_services is not None and len(self.__context_services) > 0
         if has_context:
+            contexts = self.__retrieve_context(question)
             contexts_system_message = self.__create_contexts_message(contexts)
         restrictions_system_message = self.__create_restrictions_message()
         human_message = self.__create_human_prompt(question)
