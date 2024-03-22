@@ -136,12 +136,12 @@ class Chatbot:
         return str(ai_message.content)
 
     def __create_contexts_message(self, contexts: list[str]) -> BaseMessage:
-        template = """Use the information present in the text between
-        the <contexts> tags to answer all questions.
-
-        <contexts>
+        template = """
+        ---
         {contexts}
-        <contexts>
+        ---
+
+        Use the information present in the text to answer all questions.
         """
         contexts_str = ''
         for index, context in enumerate(contexts):
@@ -150,12 +150,12 @@ class Chatbot:
         return system_prompt_template.format(contexts=contexts_str)
 
     def __create_restrictions_message(self) -> BaseMessage:
-        template = """Obey the restrictions present in the text
-        between the <restrictions> tags.
-
-        <restrictions>
+        template = """
+        ---
         {restrictions}
-        <restrictions>
+        ---
+
+        Obey the restrictions present in the text above.
         """
         restrictions_str = ''
         for index, restriction in enumerate(self.__restrictions):
