@@ -1,61 +1,61 @@
-# Chatbot Context Service
+# Simple Chatbot Lib
+This repository contains several modules that can be used to create chatbots capable of interacting with users. Each module serves a specific purpose and provides different functionalities for building chatbot applications.
 
-This project consists of a set of classes that represent a chatbot and various context services. The chatbot uses a language learning model to interact with users and retrieve context for their questions. The context services provide different methods for retrieving context, such as through an API or from Azure.
+# Classes
+## BaseChatbot
+The `BaseChatbot` class provides a base class for creating chatbots. It includes methods for starting a conversation, creating system messages with restrictions, creating prompt messages for the user, and creating introduction messages. This class serves as the foundation for more specialized chatbot classes.
 
-## Classes
+## SimpleChatbot
+The `SimpleChatbot` class extends the `BaseChatbot` class and represents a simple chatbot. In addition to the functionalities provided by the `BaseChatbot`, the SimpleChatbot is capable of retrieving context for a given question and creating system messages with the provided contexts. This class is useful for chatbots that require contextual information to provide accurate responses.
 
-### Chatbot
+## AgentChatbot
+The `AgentChatbot` class extends the `BaseChatbot` class and represents an agent chatbot. In addition to the functionalities provided by the `BaseChatbot`, the `AgentChatbot` is capable of choosing tools to answer a user's question, executing a set of tools and returning the results, and creating a results message based on the provided results. This class is useful for chatbots that require access to a set of tools to perform specific tasks.
 
-The `Chatbot` class represents a chatbot. It has methods to initiate a chat with an AI, retrieve the context for a given question, create system and human prompt messages, and retrieve the base messages and tuple messages.
+## ToolResult and ToolSet
+The `ToolResult` and `ToolSet` represent the result of a tool execution and a set of tools, respectively. These classes are useful for chatbots that need to execute specific functions or tools to provide answers or perform tasks.
 
-### ContextService
+## ContextService and APIContextService
+The `ContextService` and `APIContextService` represent classes for retrieving context from various sources. The `ContextService` is an abstract base class that defines a common interface for context services, while the `APIContextService` is a concrete implementation that retrieves context from an API. These classes are useful for chatbots that require external sources of information to provide accurate responses.
 
-The `ContextService` class is an abstract base class for context services. It provides a constructor and an abstract method for retrieving context.
+## MessageMapper
+The `MessageMapper` class provides methods for mapping messages between different formats. It includes methods for converting a list of tuple messages to a list of base messages and vice versa. This class is useful for chatbots that need to work with different message formats.
 
-### APIContextService
+## AzureAISearchContextService
+The `AzureAISearchContextService` class retrieves context from Azure using Azure Cognitive Search. It extends the `ContextService` class and includes methods for retrieving context from Azure. This class is useful for chatbots that need to search for information in an Azure index.
 
-The `APIContextService` class extends `ContextService` and provides a constructor and a method for retrieving context from an API.
-
-### AzureRAGContextService
-
-The `AzureRAGContextService` class extends `RAGContextService` and provides a constructor and a method for retrieving context from Azure Cognitive Search.
-
-## Usage
-
-To use these classes, you need to create instances of them and call their methods. For example, to create a chatbot and initiate a chat, you can do:
+# Usage
+To use these classes, simply import the desired module into your chatbot application and create an instance of the corresponding class. You can then use the methods and attributes provided by the class to interact with users and perform specific tasks.
 
 ```python
-from chatbot_lib.chatbots.models import Chatbot
-from chatbot_lib.mappers.messages import MessageMapper
-from chatbot_lib.services.models import APIContextService
+from simple_chatbot_lib.chatbots import SimpleChatbot
+from simple_chatbot_lib.mappers import MessageMapper
+from simple_chatbot_lib.third_parties.context_services import AzureAISearchContextService
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(openai_api_key='...')
 
-azure_rag_context = AzureRAGContextService(
+az_ai_search_context = AzureAISearchContextService(
     azure_key='...',
     endpoint='...',
     index_name='...'
 )
 
-message_mapper = MessageMapper()
+simple_chatbot = SimpleChatbot(llm=llm,
+                               context_services=[az_ai_search_context],
+                               restrictions=['Do not answer questions that deviate from the informed context'],
+                               personality='Friendly, helpful, and respectful',
+                               language='English',
+                               base_messages=None,
+                               message_mapper=MessageMapper())
 
-chatbot = Chatbot(llm=llm,
-                  context_services=[azure_rag_context],
-                  restrictions=['Do not answer questions that deviate from the informed context'],
-                  personality='Friendly, helpful, and respectful',
-                  language='English',
-                  base_messages=None,
-                  message_mapper=message_mapper)
-
-response = chatbot('What are your business hours?')
+response = simple_chatbot('What are your business hours?')
 print(response)
 ```
 
-## Requirements
+# Requirements
+* Python >= 3.11
+* LangChain >= 0.1.0 < 0.2.0
 
-This project requires Python 3.11 or later. Several of the features are built on top of the LangChain 0.1.0 library.
-
-## License
+# License
 
 This project is licensed under the terms of the GNU General Public License v3.0. See the [LICENSE](LICENSE.md) file for details.
