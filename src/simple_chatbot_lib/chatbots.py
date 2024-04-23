@@ -29,9 +29,9 @@ from langchain_core.messages import HumanMessage
 
 # Langchain
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import PydanticOutputParser, OutputFixingParser
 
-# Chatbot Lib
+# Simple Chatbot Lib
 from simple_chatbot_lib.context_services import ContextService
 from simple_chatbot_lib.mappers import MessageMapper
 from simple_chatbot_lib.core.models import ToolSet
@@ -359,7 +359,8 @@ class AgentChatbot(BaseChatbot):
                  message_mapper: MessageMapper,
                  tools: list[StructuredTool],
                  keep_messages: bool = True,
-                 base_messages: Optional[list[BaseMessage]] = None) -> None:
+                 base_messages: Optional[list[BaseMessage]] = None,
+                 max_retries_parser: int = 1) -> None:
         """Initializes an AgentChatbot object.
 
         Args:
@@ -373,6 +374,8 @@ class AgentChatbot(BaseChatbot):
             Defaults to True.
             base_messages (Optional[list[BaseMessage]], optional): The base messages
             for the chatbot. Defaults to None.
+            max_retries_parser (int, optional): The maximum number of retries for the parser.
+            Defaults to 1.
         """
         super(AgentChatbot, self).__init__(llm, restrictions, personality, language,
                                            message_mapper, keep_messages, base_messages)
@@ -381,6 +384,7 @@ class AgentChatbot(BaseChatbot):
             if not tool.__doc__:
                 raise ValueError(f'Tool {tool.name} must have a docstring')
             self.tools[tool.name] = tool
+        self._max_retries_parser = max_retries_parser
 
     def chat(self, question: str) -> str:
         """Chat with the chatbot by asking a question.
@@ -450,13 +454,16 @@ class AgentChatbot(BaseChatbot):
             }
             str_tools += json.dumps(function_schema) + '\n\n'
         output_parser = PydanticOutputParser(pydantic_object=ToolSet)
+        output_fixing_parser = OutputFixingParser.from_llm(llm=self._llm,
+                                                           output_parser=output_parser,
+                                                           max_retries=self._max_retries_parser)
         format_instructions = output_parser.get_format_instructions()
         messages = system_prompt.format_messages(tools=str_tools,
                                                  question=question,
                                                  format_instructions=format_instructions)
         human_message = HumanMessage(content=question)
         messages.append(human_message)
-        chain = self._llm | output_parser
+        chain = self._llm | output_fixing_parser
         return chain.invoke(messages)
 
     def _execute_tools(self, toolset: ToolSet):
