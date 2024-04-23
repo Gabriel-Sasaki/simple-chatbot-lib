@@ -455,7 +455,7 @@ class AgentChatbot(BaseChatbot):
             str_tools += json.dumps(function_schema) + '\n\n'
         output_parser = PydanticOutputParser(pydantic_object=ToolSet)
         output_fixing_parser = OutputFixingParser.from_llm(llm=self._llm,
-                                                           output_parser=output_parser,
+                                                           parser=output_parser,
                                                            max_retries=self._max_retries_parser)
         format_instructions = output_parser.get_format_instructions()
         messages = system_prompt.format_messages(tools=str_tools,
