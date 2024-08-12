@@ -50,6 +50,8 @@ class BaseChatbot(metaclass=abc.ABCMeta):
         message_mapper (MessageMapper): The message mapper used by the chatbot.
         keep_messages (bool, optional): Whether to keep the chat messages.
         Defaults to True.
+        always_generate_intro (bool, optional): Whether to always generate an
+        introduction message. Defaults to False.
         base_messages (Optional[list[BaseMessage]], optional): A list of
         base messages. Defaults to None.
 
@@ -211,6 +213,8 @@ class SimpleChatbot(BaseChatbot):
         message_mapper (MessageMapper): The message mapper used by the chatbot.
         keep_messages (bool, optional): Whether to keep the chatbot's messages.
         Defaults to True.
+        always_generate_intro (bool, optional): Whether to always generate an
+        introduction message. Defaults to False.
         context_services (list[ContextService], optional): A list of context
         services used by the chatbot. Defaults to None.
         base_messages (list[BaseMessage], optional): A list of base messages
@@ -234,6 +238,7 @@ class SimpleChatbot(BaseChatbot):
                  language: str,
                  message_mapper: MessageMapper,
                  keep_messages: bool = True,
+                 always_generate_intro: bool = False,
                  context_services: Optional[list[ContextService]] = None,
                  base_messages: Optional[list[BaseMessage]] = None) -> None:
         """Initializes a SimpleChatbot object.
@@ -246,13 +251,16 @@ class SimpleChatbot(BaseChatbot):
             message_mapper (MessageMapper): The message mapper used by the chatbot.
             keep_messages (bool, optional): Whether to keep the chatbot's messages.
             Defaults to True.
+            always_generate_intro (bool, optional): Whether to always generate an
+            introduction message. Defaults to False.
             context_services (list[ContextService], optional): A list of context
             services used by the chatbot. Defaults to None.
             base_messages (list[BaseMessage], optional): A list of base messages
             used by the chatbot. Defaults to None.
         """
-        super(SimpleChatbot, self).__init__(llm, restrictions, personality, language, 
-                                            message_mapper, keep_messages, base_messages)
+        super(SimpleChatbot, self).__init__(llm, restrictions, personality, language,
+                                            message_mapper, keep_messages, always_generate_intro,
+                                            base_messages)
         self._context_services = context_services
 
     def chat(self, question: str) -> str:
@@ -336,6 +344,8 @@ class AgentChatbot(BaseChatbot):
         tools (list[StructuredTool]): The list of tools available to the chatbot.
         keep_messages (bool, optional): Whether to keep the chatbot's messages.
         Defaults to True.
+        always_generate_intro (bool, optional): Whether to always generate an
+        introduction message. Defaults to False.
         base_messages (list[BaseMessage], optional): A list of base messages used
         by the chatbot. Defaults to None.
 
@@ -362,6 +372,7 @@ class AgentChatbot(BaseChatbot):
                  message_mapper: MessageMapper,
                  tools: list[StructuredTool],
                  keep_messages: bool = True,
+                 always_generate_intro: bool = False,
                  base_messages: Optional[list[BaseMessage]] = None,
                  max_retries_parser: int = 1) -> None:
         """Initializes an AgentChatbot object.
@@ -375,13 +386,16 @@ class AgentChatbot(BaseChatbot):
             tools (list[StructuredTool]): The list of tools available to the chatbot.
             keep_messages (bool, optional): Whether to keep the chatbot's messages.
             Defaults to True.
+            always_generate_intro (bool, optional): Whether to always generate an
+            introduction message. Defaults to False.
             base_messages (Optional[list[BaseMessage]], optional): The base messages
             for the chatbot. Defaults to None.
             max_retries_parser (int, optional): The maximum number of retries for the parser.
             Defaults to 1.
         """
         super(AgentChatbot, self).__init__(llm, restrictions, personality, language,
-                                           message_mapper, keep_messages, base_messages)
+                                           message_mapper, keep_messages, always_generate_intro,
+                                           base_messages)
         self.tools = {}
         for tool in tools:
             if not tool.__doc__:
