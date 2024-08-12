@@ -103,7 +103,8 @@ class BaseChatbot(metaclass=abc.ABCMeta):
         self._keep_messages = keep_messages
 
         if not base_messages or always_generate_intro:
-            self._base_messages = [self._create_introduction()]
+            self._base_messages = base_messages if base_messages else []
+            self._base_messages.append(self._create_introduction())
         else:
             self._base_messages = base_messages
 
