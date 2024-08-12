@@ -73,6 +73,7 @@ class BaseChatbot(metaclass=abc.ABCMeta):
                  language: str,
                  message_mapper: MessageMapper,
                  keep_messages: bool = True,
+                 always_generate_intro: bool = False,
                  base_messages: Optional[list[BaseMessage]] = None) -> None:
         """Initializes a Chatbot object.
 
@@ -84,6 +85,8 @@ class BaseChatbot(metaclass=abc.ABCMeta):
             message_mapper (MessageMapper): The message mapper used by the chatbot.
             keep_messages (bool, optional): Whether to keep the chat messages.
             Defaults to True.
+            always_generate_intro (bool, optional): Whether to always generate an
+            introduction message. Defaults to False.
             base_messages (Optional[list[BaseMessage]], optional): A list of base
             messages. Defaults to None.
 
@@ -97,7 +100,7 @@ class BaseChatbot(metaclass=abc.ABCMeta):
         self._message_mapper = message_mapper
         self._keep_messages = keep_messages
 
-        if base_messages is None or len(base_messages) < 1:
+        if base_messages or always_generate_intro:
             self._base_messages = [self._create_introduction()]
         else:
             self._base_messages = base_messages
